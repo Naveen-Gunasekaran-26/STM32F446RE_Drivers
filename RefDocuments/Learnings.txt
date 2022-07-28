@@ -1,8 +1,0 @@
-The output speed register controls the speed of transition from LOW to HIGH or viceversa.
-In other words it controls the slew rate of a GPIO pin switching.
-Refer to the product datasheet for the values of OSPEED bits versus VDD range and external load.
-
-RCC
-====
-RCC controls the clock for all the domains/buses (like APB,AHB buses).
-While configuring peripherals, we have to configure these RCC registers for en/dis clocks and other clock associated functionalities. In refmanual goto RCC registers -> for eg : AHB1ENR

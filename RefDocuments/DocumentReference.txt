@@ -1,5 +1,0 @@
-For Registersets - Refer reference manual rm not datasheet
-For resistance value of Pullup/Pulldown resistors - Refer datasheet/ search "weak pull"
-For speed of the outputspeedreg - Refer to the product datasheet / search "ospeed" -> it will take you to I/O AC characteristics table.
-For alternate functionalities supported by a pin - refer datasheet / goto Pinouts and pin description -> Alternate function mapping.
-For configuring the alternate function regs - refer datasheet of MCU, not rm of ST's MCUs
