@@ -1,0 +1,10 @@
+21:45:45 **** Clean-only build of configuration Debug for project stm32f4xx_drivers ****
+make -j16 clean 
+rm -rf ./drivers/Src/stm32f446xx_gpio_driver.d ./drivers/Src/stm32f446xx_gpio_driver.o ./drivers/Src/stm32f446xx_gpio_driver.su ./drivers/Src/stm32f446xx_i2c_driver.d ./drivers/Src/stm32f446xx_i2c_driver.o ./drivers/Src/stm32f446xx_i2c_driver.su ./drivers/Src/stm32f446xx_rcc_driver.d ./drivers/Src/stm32f446xx_rcc_driver.o ./drivers/Src/stm32f446xx_rcc_driver.su ./drivers/Src/stm32f446xx_spi_driver.d ./drivers/Src/stm32f446xx_spi_driver.o ./drivers/Src/stm32f446xx_spi_driver.su ./drivers/Src/stm32f446xx_usart_driver.d ./drivers/Src/stm32f446xx_usart_driver.o ./drivers/Src/stm32f446xx_usart_driver.su
+rm -rf ./Startup/startup_stm32f446retx.d ./Startup/startup_stm32f446retx.o
+rm -rf ./Src/016UART_Case.d ./Src/016UART_Case.o ./Src/016UART_Case.su
+rm -rf default.size.stdout stm32f4xx_drivers.elf stm32f4xx_drivers.list stm32f4xx_drivers.map
+ 
+
+21:45:45 Build Finished. 0 errors, 0 warnings. (took 139ms)
+

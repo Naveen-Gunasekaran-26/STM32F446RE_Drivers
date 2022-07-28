@@ -1,0 +1,98 @@
+/*
+ * stm32f446xx_rcc_driver.c
+ *
+ *  Created on: 17-Jul-2022
+ *      Author: gn260
+ */
+
+#include "stm32f446xx_rcc_driver.h"
+
+
+
+uint16_t AHB_PrescalerValues[8] = {2,4,8,16,64,128,256,512};
+uint8_t APB1_PrescalerValues[4] = {2,4,8,16};
+
+
+
+uint32_t RCC_GetPLLOutputClock(void){
+	return 0;
+}
+
+
+uint32_t RCC_GetPCLK1Value(void){
+
+	uint32_t pclk1, clksrc, systemClock, hpre, ahbPrescaler, ppre1, apb1Prescaler;
+
+    //	Extracting SWS bits (2-3) from the RCC-CFGR register
+	clksrc = (RCC->CFGR >> 2) & 0x3;
+	if(clksrc == 0){
+		// HSI is used as the system clock
+		systemClock = 16000000;
+	}
+	else if(clksrc == 1){
+		// HSE is used as the system clock
+		systemClock = 8000000;
+	}
+	else if(clksrc == 2){
+		// PLL is used as the system clock
+		systemClock = RCC_GetPLLOutputClock();
+	}
+
+	// Extracting HPRE(to calculate AHB prescaler) bits (4-7) from the RCC-CFGR register
+	hpre = (RCC->CFGR >> 4) & 0xF;
+	if(hpre < 8)
+		ahbPrescaler = 1;
+	else
+		ahbPrescaler = AHB_PrescalerValues[hpre-8];
+
+
+	// Extracting PPRE1(to calculate APB1 prescaler) bits (10-12) from the RCC-CFGR register
+	ppre1 = (RCC->CFGR >> 10) & 0x7;
+	if(ppre1 < 4)
+		apb1Prescaler = 1;
+	else
+		apb1Prescaler = APB1_PrescalerValues[ppre1-4];
+
+
+	// Calculating the PCLK1
+	pclk1 = (systemClock / ahbPrescaler) / apb1Prescaler;
+	return pclk1;
+}
+
+
+uint32_t RCC_GetPCLK2Value(void){
+
+	uint32_t pclk2, clksrc, systemClock, hpre, ahbPrescaler, ppre2, apb2Prescaler;
+
+    //	Extracting SWS bits (2-3) from the RCC-CFGR register
+	clksrc = (RCC->CFGR >> 2) & 0x3;
+	if(clksrc == 0){
+		// HSI is used as the system clock
+		systemClock = 16000000;
+	}
+	else if(clksrc == 1){
+		// HSE is used as the system clock
+		systemClock = 8000000;
+	}
+
+	// Extracting HPRE(to calculate AHB prescaler) bits (4-7) from the RCC-CFGR register
+	hpre = (RCC->CFGR >> 4) & 0xF;
+	if(hpre < 8)
+		ahbPrescaler = 1;
+	else
+		ahbPrescaler = AHB_PrescalerValues[hpre-8];
+
+
+	// Extracting PPRE2(to calculate APB2 prescaler) bits (13-15) from the RCC-CFGR register
+	ppre2 = (RCC->CFGR >> 13) & 0x7;
+	if(ppre2 < 4)
+		apb2Prescaler = 1;
+	else
+		apb2Prescaler = APB1_PrescalerValues[ppre2-4];
+
+
+	// Calculating the pclk2
+	pclk2 = (systemClock / ahbPrescaler) / apb2Prescaler;
+	return pclk2;
+}
+

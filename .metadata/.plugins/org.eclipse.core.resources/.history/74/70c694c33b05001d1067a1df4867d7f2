@@ -1,0 +1,155 @@
+/*
+ * 013I2C_Slave_TX_Testing.c
+ *
+ *  Created on: 15-Jul-2022
+ *      Author: gn260
+ */
+
+#include "stm32f446xx.h"
+#include <stdio.h>
+#include <string.h>
+
+extern void initialise_monitor_handles();
+
+/*
+ * PB6 -> SCL
+ * PB9 (or) PB7 -> SDA
+ */
+
+
+uint8_t txBuffer[32] = "Hello from STM32\n";
+uint8_t commandCode;
+uint8_t bufferIndex = 0;
+
+#define SLAVE_ADDRESS 		0x68
+
+
+I2C_Handle_t I2C1Handle;
+
+
+void I2C1_GPIOInit(void){
+
+	GPIO_Handle_t I2C1_Pins;
+
+	I2C1_Pins.pGPIOx = GPIOB;
+	I2C1_Pins.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
+	I2C1_Pins.GPIO_PinConfig.GPIO_PinOPType = GPIO_OPTYPE_OD;
+	I2C1_Pins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PIN_PU;
+	I2C1_Pins.GPIO_PinConfig.GPIO_PinAltFuncMode = 4;
+	I2C1_Pins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_HIGH;
+
+	// SCL
+	I2C1_Pins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_6;
+	GPIO_Init(&I2C1_Pins);
+
+	// SDA
+	I2C1_Pins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_7;
+	GPIO_Init(&I2C1_Pins);
+
+}
+
+
+void I2C1_Init(void){
+
+	I2C1Handle.pI2Cx = I2C1;
+	I2C1Handle.I2C_Config.I2C_ACKControl = I2C_ACK_ENABLE;
+	I2C1Handle.I2C_Config.I2C_DeviceAddress = SLAVE_ADDRESS;
+	I2C1Handle.I2C_Config.I2C_FMDutyCycle = I2C_FM_DUTY_2;
+	I2C1Handle.I2C_Config.I2C_SCLSpeed = I2C_SCL_SPEED_SM;
+
+	I2C_Init(&I2C1Handle);
+}
+
+void GPIO_ButtonInit(void){
+
+	GPIO_Handle_t GPIO_Button;
+
+	GPIO_Button.pGPIOx = GPIOC;
+	GPIO_Button.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_13;
+	GPIO_Button.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_IN;
+	GPIO_Button.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_MED;
+//	GPIO_Button.GPIO_PinConfig.GPIO_PinOPType = GPIO_OPTYPE_PP;
+	GPIO_Button.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PIN_PU;
+
+	GPIO_Init(&GPIO_Button);
+}
+
+
+void delay(void){
+
+	for(uint32_t i=0; i<500000; i++);
+}
+
+
+
+int main(void){
+
+	initialise_monitor_handles();
+	printf("Application has started running...!\n");
+
+	// GPIO Button configuration and initialization
+	GPIO_ButtonInit();
+
+	// I2C1 pin configuration and initialization
+	I2C1_GPIOInit();
+
+	// I2C1 Peripheral configuration and initialization
+	I2C1_Init();
+
+	// I2C IRQ configuration
+	I2C_IRQInterruptConfig(IRQ_NUM_I2C1_EV, ENABLE);
+	I2C_IRQInterruptConfig(IRQ_NUM_I2C1_ER, ENABLE);
+
+	I2C_SlaveControlCallbackEvents(I2C1, ENABLE);
+
+	// Enable the I2C1 peripheral
+	I2C_PeripheralControl(I2C1, ENABLE);
+
+	// The PE bit should be 1 for enabling the ACK bit
+	// The PE bit is set in the I2C_PeripheralControl() function call
+	// Thus we are enabling ACK after PE has been set
+	I2C_ACKControl(I2C1, ENABLE);
+
+	while(1);
+}
+
+void I2C1_EV_IRQHandler(void){
+	I2C_EV_IRQHandling(&I2C1Handle);
+}
+
+void I2C1_ER_IRQHandler(void){
+	I2C_ER_IRQHandling(&I2C1Handle);
+}
+
+void I2C_ApplicationEventCallback(I2C_Handle_t *pI2CHandle, uint8_t AppEvent){
+
+	if(AppEvent == I2C_EV_DATA_REQUEST){
+
+		// Master requests for data from slave
+		if(commandCode == 0x51){
+			// Send length information to master if commandCode == 0x51
+			I2C_SlaveSendData(pI2CHandle->pI2Cx, strlen((char *)txBuffer));
+		}
+		else if(commandCode == 0x52){
+			// Send data in txBuffer to master if commandCode == 0x52
+			I2C_SlaveSendData(pI2CHandle->pI2Cx, txBuffer[bufferIndex++]);
+		}
+	}
+	else if(AppEvent == I2C_EV_DATA_RECEIVE){
+
+		// Master has sent data for slave to read
+		commandCode = I2C_SlaveReceiveData(pI2CHandle->pI2Cx);
+	}
+	else if(AppEvent == I2C_ERROR_AF){
+
+		// This error occurs only during slave transmission
+		// Master has sent NACK intimating slave to stop sending data
+		commandCode = 0xff;
+		bufferIndex = 0;
+	}
+	else if(AppEvent == I2C_EV_STOP){
+
+		// This event occurs only during slave reception
+		// Master has ended the I2C communication with the slave
+	}
+}

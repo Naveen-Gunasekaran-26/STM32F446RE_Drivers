@@ -1,0 +1,27 @@
+/*
+ * stm32f446xx_usart_driver.h
+ *
+ *  Created on: 17-Jul-2022
+ *      Author: gn260
+ */
+
+#ifndef INC_STM32F446XX_USART_DRIVER_H_
+#define INC_STM32F446XX_USART_DRIVER_H_
+
+
+#include "stm32f446xx.h"
+
+
+typedef struct{
+
+
+}USART_Config_t;
+
+
+typedef struct{
+
+
+}USART_Handle_t;
+
+
+#endif /* INC_STM32F446XX_USART_DRIVER_H_ */

@@ -1,0 +1,45 @@
+Create a new folder "drivers" by right clicking the project.
+Create 2 folders within drivers folder -> Inc, Src
+Right click drivers folder -> properties -> C/C++ Build -> Uncheck the checkbox "Exclude resource from build" -> Apply.
+
+
+Create device specific header file : 
+Rightclick drivers.Inc folder -> New header file -> Name it based on the device variant for eg: "stm32f446xx.h". Below in the Template -> Choose "Default C header template" -> Finish
+
+Update the Includepath settings inorder for the build to recognize the driver files and then compile.
+Right click Project -> Properties -> C/C++ Build -> Settings -> Tool settings -> MCU GCC Compiler -> Includes -> Click the add button -> Click on Workspace -> Select the Inc directory in "drivers" folder -> Click OK -> Apply -> Build the project
+
+
+
+First define the base addresses of all the peripherals in the device specific header file stm32f446xx.h.
+
+Flash
+======
+For Flash base address -> Refer Flash module organization table in RM.
+
+SRAM
+=====
+For SRAM / SRAM1 -> In RM -> Memory and bus architecture -> Memory organization ->  Memory map and register boundary addresses
+
+ROM
+=====
+ROM is be mentioned as System memory -> Refer RM -> Memory map and register boundary addresses
+
+
+Defining Peripheral base addresses
+===================================
+Refer RM -> Memory organization -> Memory Map -> TABLE STM32F446xx register boundary addresses
+* Different perifpherals are hanging on different bus domains.
+* AHB bus is used for those peripherals which uses high speed data communication (eg: camera intf, GPIOs)
+* APB bus is used for those peripherals for which low speed communication would suffice.
+
+First map all the peripheral bus base addresses.
+Then map all the peripherals baseaddresses hanging on each peripheral buses.
+
+
+
+
+
+
+stm32f446xx.h contains MCU specific data
+stm32f446xx_{periphName}_driver.h contains driver specific data
